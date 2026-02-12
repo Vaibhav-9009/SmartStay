@@ -15,8 +15,8 @@ const PropertyList = ({ isLoggedIn }) => {
   return (
     <div>
       <h2>Available Properties</h2>
-
-      {properties.map((property) => (
+      {Array.isArray(properties) &&
+  properties.map((property) => (
         <div
           key={property._id}
           style={{
