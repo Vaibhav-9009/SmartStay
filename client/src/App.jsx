@@ -1,65 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./components/Login";
 import PropertyList from "./components/PropertyList";
 import MyBookings from "./components/MyBookings";
 
+function App() {
 
-const App = () => {
-  // ✅ Initialize login state directly from localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!localStorage.getItem("token");
-  });
+  const [user, setUser] = useState(null);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
+  // ✅ restore user after refresh
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
+  // ✅ logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setIsLoggedIn(false);
+    localStorage.removeItem("user");
+    setUser(null);
   };
 
   return (
-    <div style={{ padding: "30px", fontFamily: "sans-serif" }}>
-      
-      {/* 🔥 HEADER WITH LOGO */}
-      <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "20px" }}>
- <img
-  src={`${import.meta.env.BASE_URL}smartstay-logo.png`}
-  alt="SmartStay Logo"
-  style={{ height: "60px" }}
-/>
-</div>
+    <div>
 
+      {/* LOGIN OR LOGOUT */}
+      {!user ? (
+        <Login setUser={setUser} />
+      ) : (
+        <div>
+          <h3>Welcome, {user.name}</h3>
 
-      {/* ✅ Logout Button */}
-      {isLoggedIn && (
-        <button
-          onClick={handleLogout}
-          style={{
-            marginBottom: "20px",
-            padding: "8px 15px",
-            backgroundColor: "#ef4444",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            borderRadius: "6px",
-          }}
-        >
-          Logout
-        </button>
+          <button onClick={handleLogout}>
+            Logout
+          </button>
+
+          <MyBookings />
+
+        </div>
       )}
 
-      {/* ✅ Show Login if not logged in */}
-      {!isLoggedIn && <Login onLogin={handleLogin} />}
-
-      {/* ✅ Properties always visible */}
+      <h2>Available Properties</h2>
       <PropertyList />
 
-      {/* ✅ My Bookings only when logged in */}
-      {isLoggedIn && <MyBookings />}
     </div>
   );
-};
+}
 
 export default App;
