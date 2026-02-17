@@ -5,47 +5,44 @@ require("dotenv").config();
 
 const app = express();
 
-// ======================
-// Middleware
-// ======================
-app.use(cors());
+// middleware
+app.use(cors({
+  origin: "*", // allow all origins (safe for now)
+}));
 app.use(express.json());
 
-// ======================
-// Routes
-// ======================
+
+// routes
 const authRoutes = require("./routes/authRoutes");
 const propertyRoutes = require("./routes/propertyRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 
+
+// route usage
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/bookings", bookingRoutes);
 
-// Test route
+
+// test route
 app.get("/", (req, res) => {
   res.send("SmartStay API running");
 });
 
-// ======================
-// MongoDB Connection
-// ======================
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected");
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
-  });
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+  console.log("MongoDB connected");
+})
+.catch((err) => {
+  console.error("MongoDB connection error:", err.message);
+});
 
-// ======================
-// Server Start
-// ======================
 
+// PORT
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
