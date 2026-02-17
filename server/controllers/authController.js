@@ -51,52 +51,37 @@ exports.register = async (req, res) => {
 // @route   POST /api/auth/login
 exports.login = async (req, res) => {
   try {
-    let { email, password } = req.body;
+    const email = req.body.email.toLowerCase().trim();
+    const password = req.body.password;
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
-    }
-
-    // Normalize email
-    email = email.toLowerCase().trim();
-
-    // Find user
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Check JWT secret exists
-    if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET missing in environment variables");
-      return res.status(500).json({ message: "Server configuration error" });
-    }
-
-    // Generate token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    return res.status(200).json({
+    res.json({
       token,
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
 
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ error: error.message });
   }
 };
