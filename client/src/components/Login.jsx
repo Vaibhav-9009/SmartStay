@@ -1,54 +1,65 @@
 import { useState } from "react";
 import API from "../api/api";
 
-const Login = ({ onLogin }) => {
+export default function Login() {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-   const handleLogin = async () => {
-  try {
-    const response = await API.post("/auth/login", {
-      email,
-      password,
-    });
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-    localStorage.setItem("token", response.data.token);
-    onLogin();
+    try {
+      const res = await API.post("/auth/login", {
+        email,
+        password,
+      });
 
-  } catch (error){
-    console.log(error);
-    setError("Invalid credentials");
-  }
-};
+      console.log("LOGIN RESPONSE:", res.data);
+
+      // save token
+      localStorage.setItem("token", res.data.token);
+
+      // clear error
+      setError("");
+
+      alert("Login successful");
+
+      // optional redirect
+      window.location.reload();
+
+    } catch (err) {
+      console.log("LOGIN ERROR:", err.response?.data);
+
+      setError(
+        err.response?.data?.message || "Invalid credentials"
+      );
+    }
+  };
 
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <h3>Login</h3>
+    <form onSubmit={handleLogin}>
+      <h2>Login</h2>
 
       <input
         type="email"
-        placeholder="Email"
+        placeholder="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <br /><br />
-
       <input
         type="password"
-        placeholder="Password"
+        placeholder="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <br /><br />
+      <button type="submit">Login</button>
 
-      <button onClick={handleLogin}>Login</button>
+      {error && <p style={{color:"red"}}>{error}</p>}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+    </form>
   );
-};
-
-export default Login;
+}
